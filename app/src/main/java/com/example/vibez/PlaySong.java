@@ -38,6 +38,7 @@ public class PlaySong<File> extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_song);
         textView = findViewById(R.id.textView);
@@ -46,13 +47,18 @@ public class PlaySong<File> extends AppCompatActivity {
         next = findViewById(R.id.next);
         seekBar = findViewById(R.id.seekBar);
 
+        // Intent class is used to switch between activities.
         Intent intent = getIntent();
+
+        //getIntent().getExtras() is used to get values from intent that are stored in bundle.
         Bundle bundle = intent.getExtras();
         songs = (ArrayList) bundle.getParcelableArrayList("songList");
         textContent = intent.getStringExtra("currentSong");
         textView.setText(textContent);
         textView.setSelected(true);
         position= intent.getIntExtra("position", 0);
+
+        //a ContentProvider what we want to access by reference. It is an immutable one-to-one mapping to a resource or data.
         Uri uri = Uri.parse(songs.get(position).toString());
         mediaPlayer = MediaPlayer.create(this, uri);
         mediaPlayer.start();
@@ -75,6 +81,8 @@ public class PlaySong<File> extends AppCompatActivity {
 
             }
         });
+
+        //seekbar
         updateSeek = new Thread() {
             @Override
             public void run() {
@@ -85,25 +93,24 @@ public class PlaySong<File> extends AppCompatActivity {
                         seekBar.setProgress(currentPosition);
                         sleep(800);
                     }
-
                 } catch (Exception e) {
-
                 }
             }
         };
         updateSeek.start();
-
-
 
         play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(mediaPlayer.isPlaying()){
                     play.setImageResource(R.drawable.play);
+                    //pause the audio
                     mediaPlayer.pause();
                 }
                 else {
+                    //if the media is pause, resume it and change the icon to pause.
                     play.setImageResource(R.drawable.pause);
+                    //start playing
                     mediaPlayer.start();
                 }
             }
@@ -114,10 +121,16 @@ public class PlaySong<File> extends AppCompatActivity {
                 mediaPlayer.stop();
                 mediaPlayer.release();
                 if (position != 0) {
+
+                    //access the audio
                     position = position - 1;
                 } else {
+
+                    //if it is the first song, play the song from the beginning
                     position = songs.size() - 1;
                 }
+
+                //a ContentProvider what we want to access by reference. It is an immutable one-to-one mapping to a resource or data.
                 Uri uri = Uri.parse(songs.get(position).toString());
                 mediaPlayer = MediaPlayer.create(getApplicationContext(), uri);
                 mediaPlayer.start();
@@ -137,17 +150,18 @@ public class PlaySong<File> extends AppCompatActivity {
                 } else {
                     position = 0;
                 }
+
+                //a ContentProvider what we want to access by reference. It is an immutable one-to-one mapping to a resource or data.
                 Uri uri = Uri.parse(songs.get(position).toString());
                 mediaPlayer = MediaPlayer.create(getApplicationContext(), uri);
                 mediaPlayer.start();
+
+                //pause icon should turn into play, and vice versa.
                 play.setImageResource(R.drawable.pause);
                 seekBar.setMax(mediaPlayer.getDuration());
                 textContent=songs.get(position).toString();
                 textView.setText(textContent);
             }
         });
-
-
-
     }
 }
